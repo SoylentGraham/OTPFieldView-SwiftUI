@@ -11,7 +11,7 @@ import Combine
 
 
 // A SwiftUI view for entering OTP (One-Time Password).
-struct OTPFieldView: View {
+public struct OTPFieldView: View 
     
     @FocusState private var pinFocusState: FocusPin?
     @Binding private var otp: String
@@ -23,13 +23,13 @@ struct OTPFieldView: View {
         case pin(Int)
     }
     
-    init(numberOfFields: Int, otp: Binding<String>) {
+    public init(numberOfFields: Int, otp: Binding<String>) {
         self.numberOfFields = numberOfFields
         self._otp = otp
         self._pins = State(initialValue: Array(repeating: "", count: numberOfFields))
     }
     
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 15) {
             ForEach(0..<numberOfFields, id: \.self) { index in
                 TextField("", text: $pins[index])
