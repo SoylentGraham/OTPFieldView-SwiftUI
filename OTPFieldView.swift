@@ -109,18 +109,19 @@ struct OtpModifier: ViewModifier {
     }
 }
 
-struct OTPFieldView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        
-        VStack(alignment: .leading, spacing: 8) {
-            Text("VERIFICATION CODE")
-                .foregroundColor(Color.gray)
-                .font(.system(size: 12))
-            OTPFieldView(numberOfFields: 5, otp: .constant("54321"))
-                .previewLayout(.sizeThatFits)
-        }
-    }
+
+#Preview 
+{
+	/*@Previewable*/ @State var otp : String = ""
+
+	VStack(alignment: .leading, spacing: 8) 
+	{
+		Text("VERIFICATION CODE")
+			.foregroundColor(Color.gray)
+			.font(.system(size: 12))
+		OTPFieldView(numberOfFields: 5, otp: .constant("54321"))
+			.previewLayout(.sizeThatFits)
+	}
 }
 
 
