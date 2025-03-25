@@ -34,7 +34,7 @@ public struct OTPFieldView: View
             ForEach(0..<numberOfFields, id: \.self) { index in
                 TextField("", text: $pins[index])
                     .modifier(OtpModifier(pin: $pins[index]))
-                    .foregroundColor(.white)
+                    .onChange(of: pins[index]) 
                     .onChange(of: pins[index]) { newVal in
                         if newVal.count == 1 {
                             if index < numberOfFields - 1 {
