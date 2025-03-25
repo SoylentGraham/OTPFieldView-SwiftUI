@@ -10,6 +10,44 @@ import SwiftUI
 import Combine
 
 
+//	https://stackoverflow.com/a/76859589/355753
+public struct SelectAllTextOnBeginEditingModifier: ViewModifier 
+{
+	public func body(content: Content) -> some View {
+		content
+		/*
+#if canImport(UIKit)
+			.onReceive(NotificationCenter.default.publisher(
+				for: UITextField.textDidBeginEditingNotification)) { _ in
+					DispatchQueue.main.async {
+						UIApplication.shared.sendAction(
+							#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil
+						)
+					}
+				}
+		#endif*/
+		/*
+				.onChange(of: isFocused) { focus in
+					if focus {
+						DispatchQueue.main.async {
+							UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
+						}
+					}
+				}
+		 */
+	}
+}
+
+extension View 
+{
+	public func selectAllTextOnBeginEditing() -> some View {
+		modifier(SelectAllTextOnBeginEditingModifier())
+	}
+}
+
+
+
+
 // A SwiftUI view for entering OTP (One-Time Password).
 public struct OTPFieldView: View 
 {
@@ -63,14 +101,19 @@ public struct OTPFieldView: View
 							.fill(backgroundColor)
 							.stroke(Color.gray, lineWidth: 1)
 					)
+					.selectAllTextOnBeginEditing()
                     .modifier(OtpModifier(pin: $pins[index]))
                     .onChange(of: pins[index]) 
 					{ 
-						newVal in
+						oldVal,newVal in
                         if newVal.count == 1 {
-                            if index < numberOfFields - 1 {
+                            if index < numberOfFields - 1 
+							{
                                 pinFocusState = FocusPin.pin(index + 1)
-                            } else {
+								//pinFocusState = FocusPin.pin( max(otp.count)
+                            } 
+							else
+							{
                                 // Uncomment this if you want to clear focus after the last digit
                                 // pinFocusState = nil
                             }
@@ -108,8 +151,14 @@ public struct OTPFieldView: View
         }
     }
     
-    private func updateOTPString() {
-        otp = pins.joined()
+    private func updateOTPString() 
+	{
+		var newOtp = pins.joined()
+		newOtp = sanitiseOtp(newOtp)
+        otp = newOtp
+		
+		//	read back otp incase caller's binding modifies the string?
+		updatePinsFromOTP()
     }
 }
 
@@ -147,7 +196,7 @@ struct OtpModifier: ViewModifier {
 		Text("VERIFICATION CODE")
 			.foregroundColor(Color.gray)
 			.font(.system(size: 12))
-		OTPFieldView(numberOfFields: 5, otp: .constant("54321"))
+		OTPFieldView(numberOfFields: 5, otp:$otp)
 			.previewLayout(.sizeThatFits)
 	}
 }
