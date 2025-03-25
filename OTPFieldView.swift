@@ -12,30 +12,61 @@ import Combine
 
 // A SwiftUI view for entering OTP (One-Time Password).
 public struct OTPFieldView: View 
-    
+{
     @FocusState private var pinFocusState: FocusPin?
     @Binding private var otp: String
     @State private var pins: [String]
     
     var numberOfFields: Int
+
+	//	this _could_ be done in the binding by parent, in which case
+	//	we need to re-initialise pins after setting the binding
+	var sanitiseOtp : ((String) -> String)
+	
+	//	todo: default to OS text input colours
+	var foregroundColor : Color
+	//	todo: make this a view
+	var backgroundColor : Color
+	
     
     enum FocusPin: Hashable {
         case pin(Int)
     }
     
-    public init(numberOfFields: Int, otp: Binding<String>) {
+	public init(numberOfFields: Int, otp: Binding<String>,foregroundColor:Color=Color.black,backgroundColor:Color=Color.white,sanitiseOtp:((String) -> String)?=nil) 
+	{
         self.numberOfFields = numberOfFields
+		self.foregroundColor = foregroundColor
+		self.backgroundColor = backgroundColor
         self._otp = otp
         self._pins = State(initialValue: Array(repeating: "", count: numberOfFields))
+		self.sanitiseOtp = sanitiseOtp ?? OTPFieldView.defaultSanitiseOtp
     }
+
+	static func defaultSanitiseOtp(_ otp:String) -> String
+	{
+		return otp
+	}
+	
     
     public var body: some View {
         HStack(spacing: 15) {
-            ForEach(0..<numberOfFields, id: \.self) { index in
+            ForEach(0..<numberOfFields, id: \.self) 
+			{
+				index in
                 TextField("", text: $pins[index])
+					.frame(maxWidth: .infinity,maxHeight:.infinity)
+					.textFieldStyle(PlainTextFieldStyle())	//	remove default OS styling
+					.foregroundStyle(foregroundColor)
+					.background(
+						RoundedRectangle(cornerRadius: 4)
+							.fill(backgroundColor)
+							.stroke(Color.gray, lineWidth: 1)
+					)
                     .modifier(OtpModifier(pin: $pins[index]))
                     .onChange(of: pins[index]) 
-                    .onChange(of: pins[index]) { newVal in
+					{ 
+						newVal in
                         if newVal.count == 1 {
                             if index < numberOfFields - 1 {
                                 pinFocusState = FocusPin.pin(index + 1)
@@ -102,10 +133,7 @@ struct OtpModifier: ViewModifier {
             .onReceive(Just(pin)) { _ in limitText(textLimit) }
             .frame(width: 40, height: 48)
             .font(.system(size: 14))
-            .background(
-                RoundedRectangle(cornerRadius: 2)
-                    .stroke(Color.gray, lineWidth: 1)
-            )
+ 
     }
 }
 
