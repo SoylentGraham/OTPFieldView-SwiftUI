@@ -96,7 +96,9 @@ struct OtpModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .multilineTextAlignment(.center)
+#if canImport(UIKit)
             .keyboardType(.numberPad)
+#endif
             .onReceive(Just(pin)) { _ in limitText(textLimit) }
             .frame(width: 40, height: 48)
             .font(.system(size: 14))
